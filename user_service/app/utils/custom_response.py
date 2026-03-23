@@ -4,7 +4,6 @@ def prepare_login_response(token, role, email, full_name):
         "message": "Login successful",
         "token": token,
         "role": role,
-        "role_id": role_id,
         "email": email,
         "full_name": full_name,
     }
