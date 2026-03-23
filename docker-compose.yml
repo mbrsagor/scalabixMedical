@@ -6,6 +6,7 @@ services:
     container_name: user_service_app
     ports:
       - "8001:8000"
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
     environment:
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/user_db
       - SECRET_KEY=your-super-secret-jwt-key
@@ -25,6 +26,7 @@ services:
     container_name: doctor_service_app
     ports:
       - "8002:8000"
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
     environment:
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/doctor_db
       # Address of the user service for inter-service communication

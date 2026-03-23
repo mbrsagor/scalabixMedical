@@ -1,6 +1,7 @@
 from datetime import timedelta
 from sqlalchemy.orm import Session
 from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.responses import JSONResponse
 from fastapi.security import OAuth2PasswordRequestForm
 
 from app.db.database import get_db
@@ -17,11 +18,11 @@ router = APIRouter()
 def login_access_token(user_in: UserLogin, db: Session = Depends(get_db)):
     user = user_repository.get_by_email(db, email=user_in.email)
     if not user or not verify_password(user_in.password, user.hashed_password):
-        return custom_response.prepare_error_response("Incorrect email or password")
-        # raise HTTPException(status_code=400, detail="Incorrect email or password")
+        error_resp = custom_response.prepare_error_response("Incorrect email or password")
+        return JSONResponse(status_code=400, content=error_resp)
     elif not user.is_active:
-        return custom_response.prepare_error_response("Inactive user")
-        # raise HTTPException(status_code=400, detail="Inactive user")
+        error_resp = custom_response.prepare_error_response("Inactive user")
+        return JSONResponse(status_code=400, content=error_resp)
     
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     resp = custom_response.prepare_login_response(
@@ -37,7 +38,8 @@ def login_access_token(user_in: UserLogin, db: Session = Depends(get_db)):
 def register_user(user_in: UserCreate, db: Session = Depends(get_db)):
     user = user_repository.get_by_email(db, email=user_in.email)
     if user:
-        return custom_response.prepare_error_response("The user with this username already exists in the system.")
+        error_resp = custom_response.prepare_error_response("The user with this email already exists in the system.")
+        return JSONResponse(status_code=400, content=error_resp)
     user = user_repository.create(db, obj_in=user_in)
     # The custom response needs a dict or serializable object. Pydantic models need .model_dump() or similar, 
     # but SQLAlchemy objects can be problematic directly. 
