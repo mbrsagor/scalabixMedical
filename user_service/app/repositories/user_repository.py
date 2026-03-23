@@ -4,7 +4,7 @@ from app.schemas.user_schema import UserCreate
 from app.core.security import get_password_hash
 
 
-class UserRepository:
+class UserRepository(object):
 
     # Get user by id
     def get(self, db: Session, user_id: int):
