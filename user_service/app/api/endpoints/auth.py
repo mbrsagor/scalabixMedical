@@ -11,6 +11,7 @@ from app.repositories.user import user_repository
 
 router = APIRouter()
 
+# Login Route
 @router.post("/login", response_model=Token)
 def login_access_token(db: Session = Depends(get_db), form_data: OAuth2PasswordRequestForm = Depends()):
     user = user_repository.get_by_email(db, email=form_data.username)
@@ -25,6 +26,7 @@ def login_access_token(db: Session = Depends(get_db), form_data: OAuth2PasswordR
         "token_type": "bearer",
     }
 
+# Register Route
 @router.post("/register", response_model=UserResponse)
 def register_user(user_in: UserCreate, db: Session = Depends(get_db)):
     user = user_repository.get_by_email(db, email=user_in.email)
