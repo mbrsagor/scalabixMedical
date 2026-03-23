@@ -17,9 +17,11 @@ router = APIRouter()
 def login_access_token(user_in: UserLogin, db: Session = Depends(get_db)):
     user = user_repository.get_by_email(db, email=user_in.email)
     if not user or not verify_password(user_in.password, user.hashed_password):
-        raise HTTPException(status_code=400, detail="Incorrect email or password")
+        return custom_response.prepare_error_response("Incorrect email or password")
+        # raise HTTPException(status_code=400, detail="Incorrect email or password")
     elif not user.is_active:
-        raise HTTPException(status_code=400, detail="Inactive user")
+        return custom_response.prepare_error_response("Inactive user")
+        # raise HTTPException(status_code=400, detail="Inactive user")
     
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
     resp = custom_response.prepare_login_response(
@@ -35,10 +37,7 @@ def login_access_token(user_in: UserLogin, db: Session = Depends(get_db)):
 def register_user(user_in: UserCreate, db: Session = Depends(get_db)):
     user = user_repository.get_by_email(db, email=user_in.email)
     if user:
-        raise HTTPException(
-            status_code=400,
-            detail="The user with this username already exists in the system.",
-        )
+        return custom_response.prepare_error_response("The user with this username already exists in the system.")
     user = user_repository.create(db, obj_in=user_in)
     # The custom response needs a dict or serializable object. Pydantic models need .model_dump() or similar, 
     # but SQLAlchemy objects can be problematic directly. 
