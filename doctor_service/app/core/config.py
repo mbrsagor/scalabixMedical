@@ -2,8 +2,8 @@ from pydantic_settings import BaseSettings
 
 # settings class
 class Settings(BaseSettings):
-    DATABASE_URL: str = "postgresql://postgres:postgres@localhost:5432/doctor_db"
-    USER_SERVICE_URL: str = "http://localhost:8001"
+    DATABASE_URL: str
+    USER_SERVICE_URL: str
     
     # We may need the secret key to decode JWT tokens validated by the User Service,
     # or we can rely entirely on calling the user service /me endpoint to validate.
