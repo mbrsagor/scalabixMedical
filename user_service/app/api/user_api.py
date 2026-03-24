@@ -1,10 +1,13 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi.responses import JSONResponse
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
+
 from app.db.database import get_db
-from app.schemas.user_schema import UserResponse
 from app.models.model import User, Role
-from app.services.user_service import get_current_active_user, RoleChecker
+from app.utils import custom_response
+from app.schemas.user_schema import UserResponse
 from app.repositories.user_repository import user_repository
+from app.services.user_service import get_current_active_user, RoleChecker
 
 router = APIRouter()
 
@@ -17,13 +20,15 @@ def read_user_by_id(
 ):
     user = user_repository.get(db, user_id=user_id)
     if not user:
-        raise HTTPException(status_code=404, detail="User not found")
+        error_response = custom_response.prepare_error_response("User not found")
+        return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content=error_resp)
     
     # Only admins or the user themselves can view this profile
     if current_user.id != user_id and current_user.role != Role.ADMIN:
         # Also let doctors view profiles (this could be restricted further later)
         if current_user.role != Role.DOCTOR:
-            raise HTTPException(status_code=403, detail="Not enough permissions")
+            error_response = custom_response.prepare_error_response("Not enough permissions")
+            return JSONResponse(status_code=status.HTTP_403_FORBIDDEN, content=error_response)
     return user
 
 # Example of an RBAC protected endpoint: Only admins can list all users
