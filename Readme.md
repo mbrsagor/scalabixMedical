@@ -66,4 +66,17 @@ scalabixMedical/
         ├── schemas/
         ├── services/     (Business Logic, HTTPX calls)
         └── utils/
+└── appointment_service/
+    ├── Dockerfile
+    ├── requirements.txt
+    ├── main.py
+    └── app/
+        ├── api/
+        ├── core/
+        ├── db/
+        ├── models/
+        ├── repositories/
+        ├── schemas/
+        ├── services/     (Business Logic, HTTPX calls)
+        └── utils/
 ```

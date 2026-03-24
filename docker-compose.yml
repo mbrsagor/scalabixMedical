@@ -31,6 +31,22 @@ services:
       - ./doctor_service:/app
     restart: unless-stopped
 
+  # Appointment Service
+  appointment-api:
+    build: 
+      context: ./appointment_service
+    container_name: appointment_service_app
+    ports:
+      - "8003:8000"
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    env_file: ./appointment_service/.env
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./appointment_service:/app
+    restart: unless-stopped
+
   # PostgreSQL Database
   db:
     image: postgres:15-alpine
