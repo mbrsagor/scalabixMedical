@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 
 from app.db.database import get_db
 from app.models.model import User, Role
-from app.utils import custom_response
+from app.utils import custom_response, messages
 from app.schemas.user_schema import UserResponse
 from app.repositories.user_repository import user_repository
 from app.services.user_service import get_current_active_user, RoleChecker
@@ -20,14 +20,14 @@ def read_user_by_id(
 ):
     user = user_repository.get(db, user_id=user_id)
     if not user:
-        error_response = custom_response.prepare_error_response("User not found")
+        error_response = custom_response.prepare_error_response(messages.USER_NOT_FOUND)
         return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content=error_response)
     
     # Only admins or the user themselves can view this profile
     if current_user.id != user_id and current_user.role != Role.ADMIN:
         # Also let doctors view profiles (this could be restricted further later)
         if current_user.role != Role.DOCTOR:
-            error_response = custom_response.prepare_error_response("Not enough permissions")
+            error_response = custom_response.prepare_error_response(messages.NOT_ENOUGH_PERMISSIONS)
             return JSONResponse(status_code=status.HTTP_403_FORBIDDEN, content=error_response)
             
     user_data = UserResponse.model_validate(user).model_dump()

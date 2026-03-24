@@ -3,14 +3,14 @@ from sqlalchemy.orm import Session
 from fastapi.responses import JSONResponse
 from fastapi import APIRouter, Depends, status
 
+from app.models.model import User
 from app.db.database import get_db
-from app.utils import custom_response
 from app.core.config import settings
+from app.utils import custom_response, messages
 from app.repositories.user_repository import user_repository
+from app.services.user_service import get_current_active_user
 from app.core.security import verify_password, create_access_token
 from app.schemas.user_schema import Token, UserResponse, UserCreate, UserLogin
-from app.models.model import User
-from app.services.user_service import get_current_active_user
 
 router = APIRouter()
 
@@ -22,12 +22,12 @@ def login_access_token(user_in: UserLogin, db: Session = Depends(get_db)):
 
     # Check if user exists and password is correct
     if not user or not verify_password(user_in.password, user.hashed_password):
-        error_resp = custom_response.prepare_error_response("Incorrect email or password")
+        error_resp = custom_response.prepare_error_response(messages.INCORRECT_EMAIL_PASSWORD)
         return JSONResponse(status_code=status.HTTP_401_UNAUTHORIZED, content=error_resp)
 
     # Check if user is active
     elif not user.is_active:
-        error_resp = custom_response.prepare_error_response("Inactive user")
+        error_resp = custom_response.prepare_error_response(messages.INACTIVE_USER)
         return JSONResponse(status_code=status.HTTP_401_UNAUTHORIZED, content=error_resp)
     
     access_token_expires = timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
@@ -49,7 +49,7 @@ def register_user(user_in: UserCreate, db: Session = Depends(get_db)):
     
     # Check if user exists
     if user:
-        error_resp = custom_response.prepare_error_response("The user with this email already exists in the system.")
+        error_resp = custom_response.prepare_error_response(messages.EMAIL_ALREADY_EXISTS)
         return JSONResponse(status_code=400, content=error_resp)
     
     # Create user
