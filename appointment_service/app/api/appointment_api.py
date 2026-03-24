@@ -10,6 +10,7 @@ from app.schemas.appointment_schema import AppointmentCreate, AppointmentUpdate,
 
 router = APIRouter()
 
+# Dependency to get token from header
 def get_token(authorization: str = Header(...)):
     if not authorization.startswith("Bearer "):
         raise HTTPException(status_code=401, detail=messages.INVALID_AUTH_HEADER)
