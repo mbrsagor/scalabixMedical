@@ -1,5 +1,5 @@
 from fastapi.responses import JSONResponse
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, status
 from sqlalchemy.orm import Session
 
 from app.db.database import get_db
@@ -12,7 +12,7 @@ from app.services.user_service import get_current_active_user, RoleChecker
 router = APIRouter()
 
 # Get user by id
-@router.get("/user/{user_id}", response_model=UserResponse)
+@router.get("/user/{user_id}")
 def read_user_by_id(
     user_id: int,
     current_user: User = Depends(get_current_active_user),
@@ -21,7 +21,7 @@ def read_user_by_id(
     user = user_repository.get(db, user_id=user_id)
     if not user:
         error_response = custom_response.prepare_error_response("User not found")
-        return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content=error_resp)
+        return JSONResponse(status_code=status.HTTP_404_NOT_FOUND, content=error_response)
     
     # Only admins or the user themselves can view this profile
     if current_user.id != user_id and current_user.role != Role.ADMIN:
@@ -29,10 +29,13 @@ def read_user_by_id(
         if current_user.role != Role.DOCTOR:
             error_response = custom_response.prepare_error_response("Not enough permissions")
             return JSONResponse(status_code=status.HTTP_403_FORBIDDEN, content=error_response)
-    return user
+            
+    user_data = UserResponse.model_validate(user).model_dump()
+    return custom_response.prepare_success_response(data=user_data)
 
 # Example of an RBAC protected endpoint: Only admins can list all users
-@router.get("/", response_model=list[UserResponse], dependencies=[Depends(RoleChecker([Role.ADMIN]))])
+@router.get("/", dependencies=[Depends(RoleChecker([Role.ADMIN]))])
 def read_users(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     users = db.query(User).offset(skip).limit(limit).all()
-    return users
+    users_data = [UserResponse.model_validate(u).model_dump() for u in users]
+    return custom_response.prepare_success_response(data=users_data)
