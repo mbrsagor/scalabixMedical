@@ -13,6 +13,7 @@ def get_token(authorization: str = Header(...)):
         raise HTTPException(status_code=401, detail="Invalid authorization header format")
     return authorization.split(" ")[1]
 
+
 @router.post("/", response_model=DoctorResponse)
 async def create_doctor(
     doctor_in: DoctorCreate, 
@@ -34,6 +35,7 @@ async def create_doctor(
 
     doctor = doctor_repository.create(db, obj_in=doctor_in)
     return doctor
+
 
 @router.get("/doctor/{doctor_id}", response_model=DoctorWithUserInfo)
 async def read_doctor(
