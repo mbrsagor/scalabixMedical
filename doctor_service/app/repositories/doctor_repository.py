@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Session
-from app.models.doctor import Doctor
-from app.schemas.doctor import DoctorCreate
+from app.models.model import Doctor
+from app.schemas.doctor_schema import DoctorCreate
 
 class DoctorRepository:
     def get(self, db: Session, doctor_id: int):
