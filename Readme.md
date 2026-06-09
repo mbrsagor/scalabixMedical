@@ -80,3 +80,4 @@ scalabixMedical/
         ├── services/     (Business Logic, HTTPX calls)
         └── utils/
 ```
+## Happy coding :wink:
